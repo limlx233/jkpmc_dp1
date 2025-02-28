@@ -99,11 +99,11 @@ def to_excel(df_s11, df_s12, df_s2, df_s3, df_s4, df_s5, df2,
 
 
 
-def add_data_bar_rule(worksheet, start_row, end_row, column, start_value=0, end_value=1, color="FF0000"):
+def add_data_bar_rule(worksheet, start_row, end_row, column, color="c00000"):
     # 创建数据条规则
     data_bar_rule = DataBarRule(
-        start_type='num', start_value=start_value,
-        end_type='num', end_value=end_value,
+        start_type='num', start_value=0,
+        end_type='max',
         color=color
     )
     # 应用数据条规则到指定范围
