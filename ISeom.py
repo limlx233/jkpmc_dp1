@@ -16,9 +16,10 @@ def to_excel(df_s11, df_s12, df_s2, df_s3, df_s4, df_s5, df2,
             sheet_name4='促销品&非卖', sheet_name5='拓展部', sheet_name6='齿说', sheet_names='异常类别定义'):
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='openpyxl')
+    df_all = pd.concat([df_s11, df_s12, df_s2, df_s3, df_s4, df_s5])
     # 将多个 DataFrame 存入字典
     df_dict = {
-        '口腔数据': df_s11,
+        '明细汇总':df_all, # 新增明细汇总 
         '洗护数据': df_s12,
         '电商数据': df_s2,
         '促销品&非卖数据': df_s3,
