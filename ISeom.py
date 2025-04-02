@@ -19,7 +19,8 @@ def to_excel(df_s11, df_s12, df_s2, df_s3, df_s4, df_s5, df2,
     df_all = pd.concat([df_s11, df_s12, df_s2, df_s3, df_s4, df_s5])
     # 将多个 DataFrame 存入字典
     df_dict = {
-        '明细汇总':df_all, # 新增明细汇总 
+        '汇总':df_all, # 新增明细汇总 
+        '口腔数据': df_s11,
         '洗护数据': df_s12,
         '电商数据': df_s2,
         '促销品&非卖数据': df_s3,
