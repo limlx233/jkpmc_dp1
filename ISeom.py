@@ -105,7 +105,7 @@ def add_data_bar_rule(worksheet, start_row, end_row, column, color="c00000"):
     # 范围字符串
     range_str = f'{column}{start_row}:{column}{end_row}'
 
-    # 添加条件格式规则，排除负数
+    # 添加条件格式规则，清除库存为负数的数据
     negative_rule = FormulaRule(formula=[f'AND({column}{start_row}<0)'], stopIfTrue=True)
     worksheet.conditional_formatting.add(range_str, negative_rule)
 

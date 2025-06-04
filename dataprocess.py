@@ -131,6 +131,15 @@ def sort_and_filter(df):
     return df
 
 
+def append_sum_row(df):
+    summary_row = {
+            '产品说明': '合计',
+            '库存总件数': df['库存总件数'].sum(),
+            '数量': df['数量'].sum()
+        }
+    res = pd.concat([df, pd.DataFrame([summary_row])], ignore_index=True)
+    return res
+
 def filter_special_cases(df):
     """
     根据特定条件筛选 DataFrame
@@ -147,14 +156,13 @@ def filter_special_cases(df):
     cond7 = df['所在仓库'].str.contains('口腔', na=False)
     cond8 = df['所在仓库'].str.contains('洗护', na=False)
     cond9 = df["仓库分类"] == "正常品种销售"
-    df_s11 = df[cond9 & cond7]
-    df_s12 = df[cond9 & cond8]
-    df_s2 = df[df["仓库分类"] == "电商"]
-    df_s3 = df[cond1 | cond2]
-    df_s4 = df[cond6]
-    df_s5 = df[(cond3 & cond4) | cond5]
+    df_s11 = append_sum_row(df[cond9 & cond7])
+    df_s12 = append_sum_row(df[cond9 & cond8])
+    df_s2 = append_sum_row(df[df["仓库分类"] == "电商"])
+    df_s3 = append_sum_row(df[cond1 | cond2])
+    df_s4 = append_sum_row(df[cond6])
+    df_s5 = append_sum_row(df[(cond3 & cond4) | cond5])
     return df_s11, df_s12, df_s2, df_s3, df_s4, df_s5
-
 
 
 
