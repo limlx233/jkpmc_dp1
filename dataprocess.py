@@ -147,12 +147,12 @@ def filter_special_cases(df):
     cond7 = df['所在仓库'].str.contains('口腔', na=False)
     cond8 = df['所在仓库'].str.contains('洗护', na=False)
     cond9 = df["仓库分类"] == "正常品种销售"
-    df_s11 = df[cond9 & cond7]
-    df_s12 = df[cond9 & cond8]
-    df_s2 = df[df["仓库分类"] == "电商"]
-    df_s3 = df[cond1 | cond2]
-    df_s4 = df[cond6]
-    df_s5 = df[(cond3 & cond4) | cond5]
+    df_s11 = df[(cond9 & cond7) & (~(cond6 |((cond3 & cond4) | cond5) ))]
+    df_s12 = df[(cond9 & cond8) & (~(cond6 |((cond3 & cond4) | cond5) ))]
+    df_s2 = df[(df["仓库分类"] == "电商") & (~(cond6 |((cond3 & cond4) | cond5) ))]
+    df_s3 = df[(cond1 | cond2) & (~(cond6 |((cond3 & cond4) | cond5) ))]
+    df_s4 = df[(cond3 & cond4) | cond5] # 客户拓展部
+    df_s5 = df[cond6] # 齿说产品
     return df_s11, df_s12, df_s2, df_s3, df_s4, df_s5
 
 
