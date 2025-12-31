@@ -16,8 +16,10 @@ def to_excel(df_s11, df_s12, df_s2, df_s3, df_s4, df_s5, df2,
             sheet_name4='促销品&非卖', sheet_name5='拓展部', sheet_name6='齿说', sheet_names='异常类别定义'):
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='openpyxl')
+    df_all = pd.concat([df_s11, df_s12, df_s2, df_s3, df_s4, df_s5])
     # 将多个 DataFrame 存入字典
     df_dict = {
+        '汇总':df_all, # 新增明细汇总 
         '口腔数据': df_s11,
         '洗护数据': df_s12,
         '电商数据': df_s2,
@@ -103,7 +105,7 @@ def add_data_bar_rule(worksheet, start_row, end_row, column, color="c00000"):
     # 范围字符串
     range_str = f'{column}{start_row}:{column}{end_row}'
 
-    # 添加条件格式规则，排除负数
+    # 添加条件格式规则，清除库存为负数的数据
     negative_rule = FormulaRule(formula=[f'AND({column}{start_row}<0)'], stopIfTrue=True)
     worksheet.conditional_formatting.add(range_str, negative_rule)
 
