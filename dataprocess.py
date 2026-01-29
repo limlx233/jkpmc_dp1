@@ -1,10 +1,9 @@
-# 数据处理函数封装功能
 import numpy as np
 import pandas as pd
 import streamlit as st
 from datetime import datetime
 
-
+# 数据处理函数封装功能
 def generate_description_df():
     data_list = [
                     ['说明',None],
@@ -25,10 +24,17 @@ def generate_description_df():
 def read_data(df1, df2):
     cp_warehouses = dict(st.secrets["ccp_warehouse"])
     df2_res = df2[['产品编码', '批次号', '所在仓库']]
-    df1 = df1[['产品说明', '产品编码', '品规', '库存总件数 (销售可用+零货+破损+锁定）', '批次', '生产日期', '入库日期', '失效日期', '所在仓库']]
-    df1 = df1.rename(columns={'库存总件数 (销售可用+零货+破损+锁定）': '库存总件数'})
+    df1 = df1[['产品说明', '产品编码', '品规', '库存总件数(销售可用+零货+破损+冻结)', '批次', '失效日期', '所在仓库']]
+    df1 = df1.rename(columns={'库存总件数(销售可用+零货+破损+冻结)': '库存总件数'})
     df1 = df1.rename(columns={'批次': '批次号'})
     df1['仓库分类'] = df1['所在仓库'].map(cp_warehouses)
+
+    df1['失效日期'] = pd.to_datetime(df1['失效日期'], errors='coerce')
+    # 生产日期：失效日期 - 3年 + 1天
+    df1['生产日期'] = df1['失效日期'] - pd.DateOffset(years=3) + pd.Timedelta(days=1)
+    # 入库日期等同于生产日期
+    df1['入库日期'] = df1['生产日期']
+    df1 = df1[df1['仓库分类'].notna()]
     df_res = df1
     return df_res,df2_res
 

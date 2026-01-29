@@ -249,7 +249,7 @@ with st.container(border=True):
         if st.button(label="数据处理", type="primary", key="data_process"):
             if uploaded_file1 and uploaded_file2:
                 # 读取文件并缓存
-                df1 = pd.read_excel(uploaded_file1, header=1)  # 库存信息
+                df1 = pd.read_excel(uploaded_file1, header=0)  # 库存信息
                 df2 = pd.read_excel(uploaded_file2, header=0)  # 呆滞数据文件
                 df_res, df2_res = dp.read_data(df1, df2)
                 df_res = dp.calculate_expiry(df_res, date_value)
