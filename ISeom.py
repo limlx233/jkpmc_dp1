@@ -255,7 +255,6 @@ with st.container(border=True):
                 df_res = dp.calculate_expiry(df_res, date_value)
                 df_res = dp.expiry_classification(df_res)
                 df_res = dp.merge_and_mark(df_res, df2_res)
-                st.dataframe(df_res)
                 df_res = dp.classify_items(df_res)
                 df_res = dp.filter_and_calculate(df_res)
                 df_res = dp.sort_and_filter(df_res)

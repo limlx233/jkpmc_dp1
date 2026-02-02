@@ -24,7 +24,6 @@ def generate_description_df():
 def read_data(df1, df2):
     cp_warehouses = dict(st.secrets["ccp_warehouse"])
     df2_res = df2[['产品编码', '批次号', '所在仓库']]
-    st.dataframe(df2_res)
     df1 = df1[['产品说明', '产品编码', '品规', '库存总件数(销售可用+零货+破损+冻结)', '批次', '失效日期','生产日期', '所在仓库']]
     df1 = df1.rename(columns={'库存总件数(销售可用+零货+破损+冻结)': '库存总件数'})
     df1 = df1.rename(columns={'批次': '批次号'})
