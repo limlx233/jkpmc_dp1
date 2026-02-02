@@ -24,6 +24,7 @@ def generate_description_df():
 def read_data(df1, df2):
     cp_warehouses = dict(st.secrets["ccp_warehouse"])
     df2_res = df2[['产品编码', '批次号', '所在仓库']]
+    st.dataframe(df2_res)
     df1 = df1[['产品说明', '产品编码', '品规', '库存总件数(销售可用+零货+破损+冻结)', '批次', '失效日期','生产日期', '所在仓库']]
     df1 = df1.rename(columns={'库存总件数(销售可用+零货+破损+冻结)': '库存总件数'})
     df1 = df1.rename(columns={'批次': '批次号'})
@@ -65,10 +66,62 @@ def expiry_classification(df):
     return df
 
 
-def merge_and_mark(df1, df2):
-    merged = df1.merge(df2, on=['产品编码', '批次号', '所在仓库'], how='left', indicator=True)
-    df1['180天无动销'] = merged['_merge'].apply(lambda x: '≥180天无动销' if x == 'both' else None)
-    return df1
+def merge_and_mark(df1, df2, key_cols=['产品编码', '批次号', '所在仓库']):
+    """
+    核心功能：
+    1. 精准匹配df1和df2的关键字段交集，标记"≥180天无动销"
+    2. 将df2中匹配行的所有列（或指定列）追加到df1中
+    3. 非交集行的df2列填充为NaN，不影响df1原有数据
+    
+    参数：
+    - df1: 主数据表（需要标记和追加列的表）
+    - df2: 无动销清单表（用于匹配的表）
+    - key_cols: 匹配关键字段（默认：产品编码、批次号、所在仓库）
+    
+    返回：
+    - df1_copy: df1的副本，包含新增的"180天无动销"列+df2的所有列
+    """
+    # ========== 步骤1：数据校验 ==========
+    for df, name in [(df1, 'df1'), (df2, 'df2')]:
+        missing_cols = [col for col in key_cols if col not in df.columns]
+        if missing_cols:
+            raise ValueError(f"{name} 缺少关键字段：{missing_cols}")
+    
+    # ========== 步骤2：创建副本，保护原数据 ==========
+    df1_copy = df1.copy(deep=True)
+    df2_copy = df2.copy(deep=True)
+    
+    # ========== 步骤3：统一关键字段格式（避免类型/空格问题） ==========
+    for col in key_cols:
+        # 转字符串+去空格+空值统一为NaN
+        df1_copy[col] = df1_copy[col].astype(str).str.strip().replace(['nan', ''], np.nan)
+        df2_copy[col] = df2_copy[col].astype(str).str.strip().replace(['nan', ''], np.nan)
+    
+    # ========== 步骤4：处理df2 - 去重+保留所有列（避免一对多匹配） ==========
+    # 按关键字段去重，保留第一行（确保每个组合只匹配一次）
+    df2_unique = df2_copy.drop_duplicates(subset=key_cols, keep='first')
+    
+    # ========== 步骤5：左连接匹配 - 同步df2的所有列到df1 ==========
+    # 用suffixes避免列名重复（比如df1和df2都有"备注"列时，df2的列会变成"备注_df2"）
+    merged_df = df1_copy.merge(
+        df2_unique,
+        on=key_cols,
+        how='left',
+        indicator=True,
+        suffixes=('', '_df2')
+    )
+    # ========== 步骤6：标记"≥180天无动销"（仅交集行） ==========
+    # 规则：关键字段无空值 + 匹配成功（_merge=both）才标记
+    merged_df['180天无动销'] = np.where(
+        (merged_df['_merge'] == 'both') & 
+        (~merged_df[key_cols].isna().any(axis=1)),
+        '≥180天无动销',
+        None
+    )
+    # ========== 步骤7：整理结果 - 移除_merge列，返回最终df1 ==========
+    # 移除_merge列（临时标记列）
+    result_df = merged_df.drop(columns=['_merge'])
+    return result_df
 
 
 def classify_items(df):
