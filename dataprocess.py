@@ -28,10 +28,10 @@ def read_data(df1, df2):
     df1 = df1.rename(columns={'库存总件数(销售可用+零货+破损+冻结)': '库存总件数'})
     df1 = df1.rename(columns={'批次': '批次号'})
     df1['仓库分类'] = df1['所在仓库'].map(cp_warehouses)
-
+    df1['生产日期'] = pd.to_datetime(df1['生产日期'])
     df1['失效日期'] = pd.to_datetime(df1['失效日期'], errors='coerce')
     # 生产日期：失效日期 - 3年 + 1天
-    df1['生产日期'] = df1['失效日期'] - pd.DateOffset(years=3) + pd.Timedelta(days=1)
+    # df1['生产日期'] = df1['失效日期'] - pd.DateOffset(years=3) + pd.Timedelta(days=1)
     # 入库日期等同于生产日期
     df1['入库日期'] = df1['生产日期']
     df1 = df1[df1['仓库分类'].notna()]
@@ -159,7 +159,7 @@ def filter_special_cases(df):
     cond4 = df["产品说明"].str.contains("牙膏", na=False)
     cond5 = df["产品说明"].str.contains("达那卡", na=False)
     cond6 = df["产品说明"].str.contains("齿说", na=False)
-    cond7 = df['所在仓库'].str.contains('口腔', na=False)
+    cond7 = df['所在仓库'].str.contains('口腔|器械', na=False) # 包含 "口腔" 或 "器械" 的仓库
     cond8 = df['所在仓库'].str.contains('洗护', na=False)
     cond9 = df["仓库分类"] == "正常品种销售"
     df_s11 = append_sum_row(df[(cond9 & cond7) & (~(cond6 |((cond3 & cond4) | cond5) ))]) # df_s11 = append_sum_row(df[cond9 & cond7])
